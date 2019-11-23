@@ -25,7 +25,7 @@ async function machineDeamon(){
     machineAcc = machineIdenDecrypt.account;
     openConnectionAndSync(machineAcc).then((machineAcc) => {
       machineAcc.transferSystem.transactionSubject.subscribe(transactionUpdate => {
-        //console.log(transactionUpdate);
+        console.log(transactionUpdate);
         /*
         console.log('Machine recibio un pago de: ');
         console.log(Object.keys(transactionUpdate.transaction.participants)[0]);
@@ -46,16 +46,18 @@ async function machineDeamon(){
         };
 
         //TODO: Validamos que sea el tipo de token aceptado
-        if(newTransactionBuffer.tokenType == '/9ef5tHqRYXP2UyB84wBAPfkUEHUrWZNYaGyLVocHCNW9SL4v9UM/UAI01'){
+        if(newTransactionBuffer.tokenType == '/9ennxETYQTpvf5CWJZDRcNELmCZc8GjpcVLd27tJ2h7b3xqLQa9/UAI01'){
+          console.log('token aceptada');
           //TODO: Validamos que la cantidad transferida corresponda a la id del producto (tambien podemos validar que quede suficientes unidades)
-          if(newTransactionBuffer.amount == 3 && newTransactionBuffer.message == '123'){
+          if(newTransactionBuffer.amount == 3){ //&& newTransactionBuffer.message == '123'){
+            console.log('cantidad y (mensaje aceptado, desactivado)');
             //TODO: Buscamos el dueño del producto (en un futuro desde una lista)
-            newTransactionBuffer.seller = '9hP4DkSCFhBkgK3bUNUdM3PGAJwXHnp46bGb1EBZmdkMBPFPpkA';
+            newTransactionBuffer.seller = '9hJBpoQP4BnbQGcw2QB9XRDAS6ooFkCVfRDnDZoNidYo5NRW2Ux';
             //TODO: SOLO AGRGAR SI SU ID NO ESTA EN EL BUFFER
             transactionBuffer.push(newTransactionBuffer);
           }
         }
-        //console.log(transactionBuffer);
+        console.log(transactionBuffer);
       });
     });
   } catch(error) {
@@ -137,6 +139,7 @@ async function setRoles(from, to){
 }
 
 //Sincroniza una cuenta con la red y espera que se termine de sincronizar, retorna la cuenta
+//TODO: EXISTE UN BUG DONDE el .then NUNCA SE EJECUTA SI LA CUANTA ES NUEVA
 function openConnectionAndSync(acc) {
   return new Promise((resolve, reject) => {
     acc.openNodeConnection().then(() => {
@@ -209,6 +212,7 @@ function updateBalance(acc) {
         end => {}
       );
       */
+     //console.log(acc.transferSystem.getTokenUnitsBalanceUpdates);
      resolve(acc.transferSystem.tokenUnitsBalance);
     });
   });
@@ -218,7 +222,7 @@ async function sendTokens(req, res) {
   const {from, to, amount, tokenType} = req.body;
   try{
     var roles = await setRoles(from, to);
-    const msg = '';
+    const msg = 'mensaje';
     await lunchTransaction(roles.senderAcc, roles.senderIdenDecrypt, roles.receiverAdd, amount, tokenType, msg);
     res.status(200).send({});
   }catch(err){
@@ -231,6 +235,7 @@ async function viewBalance(req, res) {
   const {user} = req.body;
   try{
     var role = getRole(user);
+    console.log(role.userAdd);
     var balance = await updateBalance(role.userAcc);
     console.log(balance);
     res.status(200).send({balance});
@@ -265,7 +270,7 @@ async function getFromFaucet(req, res){
 
 //CREAR CUENTAS
 async function createAccunts(req, res){
-  /*
+
   const myIdentity1 = identityManager.generateSimpleIdentity();
   const myAccount1 = myIdentity1.account;
   myAccount1.openNodeConnection();
@@ -301,7 +306,7 @@ async function createAccunts(req, res){
   });
   store.put('machineAdd', myAccount3.getAddress());
   store.put('machinePass', password3);
-  */
+
   res.status(200).send({});
 }
 
@@ -352,8 +357,8 @@ async function testGenerateInvoice(req, res){
 
   const valorProducto = 3;
   const idProducto = 123;
-  const cuentaMaquina = '9ezKGNbEoVsVUbTXgDws6wL7HhXzLRwimE7GKNDEjxuBYVzwRvV';
-  const monedaAceptada = '/9ef5tHqRYXP2UyB84wBAPfkUEHUrWZNYaGyLVocHCNW9SL4v9UM/UAI01';
+  const cuentaMaquina = '9gLZEr8CzZgCnnsatfvx7q1UwUYrKY5T8PAqyZn1qvqAr9UAQpL';
+  const monedaAceptada = '/9ennxETYQTpvf5CWJZDRcNELmCZc8GjpcVLd27tJ2h7b3xqLQa9/UAI01';
   const inicioMensaje = 'https://www.radixdlt.com/dapp/payment/';
 
   const sendto = 'send?to=' + cuentaMaquina + '&';
@@ -377,9 +382,9 @@ async function testGenerateInvoice(req, res){
 
 async function testHacerPago(req, res){
   const {from} = req.body;
-  const to = '9ezKGNbEoVsVUbTXgDws6wL7HhXzLRwimE7GKNDEjxuBYVzwRvV';
+  const to = '9gLZEr8CzZgCnnsatfvx7q1UwUYrKY5T8PAqyZn1qvqAr9UAQpL';
   const amount = 3;
-  const tokenType = '/9ef5tHqRYXP2UyB84wBAPfkUEHUrWZNYaGyLVocHCNW9SL4v9UM/UAI01';
+  const tokenType = '/9ennxETYQTpvf5CWJZDRcNELmCZc8GjpcVLd27tJ2h7b3xqLQa9/UAI01';
   const msg = '123';
   try{
     var roles = await setRoles(from, to);
@@ -391,10 +396,18 @@ async function testHacerPago(req, res){
   }
 }
 
+//TODO: Este proceso debe ser unitario... en caso de salir error los dineros tienen que regresar a los dueños verdaderos
+//TODO: Añadir verificacion que solo puede haber 1 misma adress en el buffer a la vez
+//TODO: Eliminiar (enviar a dueños originales) transacciones caducadas por timestamp en el buffer
 async function testShowMyAddToMachine(req, res){
   const {user} = req.body;
   var role = getRole(user);
   var add = role.userAdd;
+  
+  //Aqui tenemos que ver el QR
+  if(add == 'qr'){
+
+  }
 
   let machineIdenEncryp, machinePass, machineAdd, machineIdenDecrypt;
   machineIdenEncryp = store.get('machineIden');
@@ -452,3 +465,14 @@ module.exports = {
     testHacerPago,
     testShowMyAddToMachine
 };
+
+//TODO: La aplicacion movil
+/*
+1) No puede tener la opcion de generar invouce
+2) Debe emular que solo funciona con la moneda UAI (pagos y recibos)
+3) Desabilitar la opcion de editar los invoice scaneados
+4) Sacar la faucet
+5) Habilitar que el scanner interno de camara si funcione con el invoice (actualmente hay que ocupar una app externa)
+6) Poder seleccionar la IP del nodo local o la red Betanet
+7) Quitar algunas cosas del menu de opciones
+*/

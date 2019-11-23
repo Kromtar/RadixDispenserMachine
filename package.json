@@ -15,7 +15,9 @@
     "express": "^4.17.1",
     "moment": "^2.24.0",
     "node-storage": "0.0.9",
+    "node-zbarimg": "^1.0.1",
     "nodemon": "^1.19.4",
+    "pi-camera-connect": "^0.2.0",
     "radixdlt": "^2.0.0-beta.1"
   },
   "devDependencies": {

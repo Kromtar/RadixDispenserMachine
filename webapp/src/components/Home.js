@@ -46,7 +46,6 @@ class Home extends Component {
             >
               Dinero de Faucet para A
             </Button >
-            {/*
             <Button
               onClick={ () => this.props.createAccunts({}) }
             >
@@ -57,14 +56,13 @@ class Home extends Component {
             >
               Crear token para A
             </Button >
-            */}
             <Button
-              onClick={ () => this.props.sendTokens({from:'a',to:'b',amount:1,tokenType:'/9ef5tHqRYXP2UyB84wBAPfkUEHUrWZNYaGyLVocHCNW9SL4v9UM/UAI01'}) }
+              onClick={ () => this.props.sendTokens({from:'a',to:'b',amount:1,tokenType:'/9ennxETYQTpvf5CWJZDRcNELmCZc8GjpcVLd27tJ2h7b3xqLQa9/UAI01'}) }
             >
               Enviar de A -> B 1 CUSTOM
             </Button >
             <Button
-              onClick={ () => this.props.sendTokens({from:'b',to:'a',amount:1,tokenType:'/9ef5tHqRYXP2UyB84wBAPfkUEHUrWZNYaGyLVocHCNW9SL4v9UM/UAI01'}) }
+              onClick={ () => this.props.sendTokens({from:'b',to:'a',amount:1,tokenType:'/9ennxETYQTpvf5CWJZDRcNELmCZc8GjpcVLd27tJ2h7b3xqLQa9/UAI01'}) }
             >
               Enviar de B -> A 1 CUSTOM
             </Button >
